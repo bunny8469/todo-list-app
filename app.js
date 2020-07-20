@@ -4,7 +4,7 @@ function id(x){
 function capitalize(str){ 
     var splitStr = str.toLowerCase().split(' ');
     for (var i = 0; i < splitStr.length; i++){ 
-        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1); 
+        splitStr[i] = splitStr[i].charAt(0).toUpperCase() + splitStr[i].substring(1);
     }
     return splitStr.join(' '); 
 }
@@ -149,12 +149,16 @@ function countUtTasks(main){
 }
 
 function newSubTask(main){
+    for (var el of document.getElementsByClassName("sub-task-input")){
+        el.disabled = true
+    }
     subTasks[main] += 1
     var sub = new Subtask(main)
     var div = id("sub-tasks-div-of-"+main)
     var subInput = sub.children[1]
     div.appendChild(sub)
     countUtTasks(main)
+    subInput.disabled = false
     subInput.value = "Untitled Task ["+untitledSub[main]+"]"
     subInput.focus()
     subInput.select()
@@ -212,19 +216,22 @@ function nameTask(){
     }
 }
 
+var editEnter;
+
 function editTaskName(name){
     if(beingEdited.name == ""){
+        editEnter = function(e){
+            if(e.keyCode == 13){
+                yesEdit(name)
+            }
+        }
         var input = id("task-input-"+name)
         var inputs = document.getElementsByClassName("task-input")
         for (var taskInput of inputs){
             taskInput.disabled = true
         }
         input.disabled = false
-        input.addEventListener("keydown", function(e){
-            if(e.keyCode == 13){
-                yesEdit(name)
-            }
-        })
+        input.addEventListener("keydown", editEnter)
         var val = input.value
         input.value = "" 
         input.value = val
@@ -249,7 +256,7 @@ function yesEdit(name){
 
     var taskInput = id("task-input-"+name)
     var oldValue = beingEdited.oldValue.split(" ").join("-").toLowerCase()
-    var newValue = (rmvExtraSpaces(taskInput.value)).split(" ").join("-").toLowerCase()
+    var newValue = rmvExtraSpaces(taskInput.value).split(" ").join("-").toLowerCase()
     if(newValue != ""){
         if(!activeTasks.includes(newValue) && newValue != oldValue){
             var taskBox = id("Task-"+name)
@@ -265,14 +272,14 @@ function yesEdit(name){
             taskInput.id = "task-input-"+newValue
             taskBox.id = "Task-"+newValue
             yesedit.id = "check-of-"+newValue
-            yesedit.setAttribute("onclick","yesEdit('"+newValue+"')")
+            yesedit.setAttribute("onclick",`yesEdit("${newValue}")`)
             noedit.id = "times-of-"+newValue
-            noedit.setAttribute("onclick","noEdit('"+newValue+"')")
+            noedit.setAttribute("onclick",`noEdit("${newValue}")`)
             pen.id = "pen-of-"+newValue
             pen.style.padding = "10px"
-            pen.setAttribute("onclick","editTaskName('"+newValue+"')")
+            pen.setAttribute("onclick",`editTaskName("${newValue}")`)
             delTask.id = "delete-"+newValue
-            delTask.setAttribute("onclick", "deleteTask('"+newValue+"')")
+            delTask.setAttribute("onclick", `deleteTask("${newValue}")`)
             arrayRemove(name)
             activeTasks.push(newValue)
         }
@@ -293,6 +300,7 @@ function yesEdit(name){
         name: "",
         oldValue: ""
     }
+    taskInput.removeEventListener("keydown", editEnter)
 }
 function noEdit(name){
     var taskInput = id("task-input-"+name)
