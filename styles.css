@@ -74,6 +74,7 @@ input::selection{
     width:100%;
     overflow: auto;
     max-height:90%;
+    background-color: #f95656;
 }
 .sub-tasks-div{
     width:100%;
